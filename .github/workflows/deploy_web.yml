@@ -10,8 +10,6 @@ jobs:
     name: Build & Deploy
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
     steps:
       - name: Checkout Repository
@@ -28,17 +26,16 @@ jobs:
       - name: Build Web
         run: flutter build web --release
 
-      - name: Deploy to cPanel via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy to cPanel via SSH/SFTP
+        uses: easingthemes/ssh-deploy@main
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          security: loose
-          local-dir: build/web/
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SFTP_SERVER }}
+          REMOTE_USER: ${{ secrets.SFTP_USERNAME }}
+          REMOTE_PORT: ${{ secrets.SFTP_PORT }}
+          SOURCE: "build/web/"
+          TARGET: ${{ secrets.FTP_SERVER_DIR }}
+          ARGS: "-rlgoDzvc -i --delete"
 
       - name: Send Email Notification
         if: always()
@@ -50,7 +47,7 @@ jobs:
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "Deployment ${{ job.status }}: ${{ github.repository }} (PR #${{ github.event.pull_request.number }})"
-          to: sharwankumarthakur77@gmail.com
+          to: shrawankumarthakur77@gmail.com
           from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
           body: |
             Deployment Status: ${{ job.status }}
