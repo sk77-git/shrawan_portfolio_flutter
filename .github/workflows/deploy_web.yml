@@ -26,16 +26,16 @@ jobs:
       - name: Build Web
         run: flutter build web --release
 
-      - name: Deploy to cPanel via SSH/SFTP
-        uses: easingthemes/ssh-deploy@main
+      - name: Deploy to cPanel via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.SFTP_SERVER }}
-          REMOTE_USER: ${{ secrets.SFTP_USERNAME }}
-          REMOTE_PORT: ${{ secrets.SFTP_PORT }}
-          SOURCE: "build/web/"
-          TARGET: ${{ secrets.FTP_SERVER_DIR }}
-          ARGS: "-rlgoDzvc -i --delete"
+          username: ${{ secrets.SFTP_USERNAME }}
+          server: ${{ secrets.SFTP_SERVER }}
+          port: ${{ secrets.SFTP_PORT }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          local_path: 'build/web/*'
+          remote_path: ${{ secrets.FTP_SERVER_DIR }}
+          sftp_only: true
 
       - name: Send Email Notification
         if: always()
